@@ -2,7 +2,7 @@ hexSnow
 =================================
 
 build with openframeworks osx 0074
-
+![ScreenShot](http://i.imgur.com/zgTsQkh.png)
 
 Introduction
 ------------
