@@ -4,9 +4,14 @@
 #define GRID_WIDTH  16
 #define GRID_HEIGHT 16
 #define LENGTH		6
-class testApp : public ofBaseApp{
+#include "ofxPostProcessing.h"
+#define RANGE 300
+#include "ofxQTKitVideoSaver.h"
+#include "ofxSyphonServer.h"
+class testApp : public ofBaseApp , public ofThread{
 
 	public:
+    void exit();
 		void setup();
 		void update();
 		void draw();
@@ -20,6 +25,8 @@ class testApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+    
+    void threadedFunction();
     ofVbo vbo;
 	ofVec3f pos[GRID_WIDTH*GRID_HEIGHT*LENGTH];
     ofVec3f loc[GRID_WIDTH*GRID_HEIGHT*LENGTH];
@@ -35,4 +42,13 @@ class testApp : public ofBaseApp{
     ofVec3f acc[GRID_WIDTH*GRID_HEIGHT];
     int count;
     float timeCount;
+    
+    ofLight light;
+    
+    // scene stuff
+    ofxPostProcessing post;
+        ofEasyCam cam;
+//    ofxQTKitVideoSaver	 saver;
+//    ofImage image;
+    ofxSyphonServer server;
 };
