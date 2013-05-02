@@ -1,17 +1,18 @@
 #include "testApp.h"
 void testApp::exit(){
-//	if(saver.isRecording()) saver.finishMovie();
+    //	if(saver.isRecording()) saver.finishMovie();
 }
 //--------------------------------------------------------------
 void testApp::setup(){
     
-//    saver.setup(ofGetWidth()   ,ofGetHeight(),30);
-//    image.allocate(ofGetWidth()   ,ofGetHeight(), OF_IMAGE_COLOR_ALPHA);
+    //    saver.setup(ofGetWidth()   ,ofGetHeight(),30);
+    //    image.allocate(ofGetWidth()   ,ofGetHeight(), OF_IMAGE_COLOR_ALPHA);
     ofSetFrameRate(60);
     ofEnableSmoothing();
     ofBackground(0);
-    center.set(ofGetWidth()/2,ofGetHeight()/2);
-    SIZE = (ofGetWidth()/GRID_WIDTH*1.0f)*0.5;
+//    center.set(0,0);
+    center.set(0,0);
+    SIZE = (ofGetWidth()/GRID_WIDTH*1.0f);
 	space      = sin((1/6.0f)*2*M_PI)*SIZE*2;
     float space2      = sin((1/6.0f)*2*M_PI)*SIZE*1.7;
 	float minX = center.x - (GRID_WIDTH * space);
@@ -22,14 +23,16 @@ void testApp::setup(){
 	for (int j=0; j<GRID_HEIGHT; j++) {
 		for (int i=0; i<GRID_WIDTH; i++) {
             
-
+            
 			int index   =   (j*GRID_WIDTH+i) * LENGTH;
             int index2  =   (j*GRID_WIDTH+i);
-
-            center_pos[index2].y = ofRandom(-10000,-800);
-            center_pos[index2].z = ofRandom(-RANGE,RANGE);
+            center_pos[index2].x = (i * space+((j%2)*0.5)*space) + center.x - (GRID_WIDTH * space)*0.5;
+            //            center_pos[index2].y = ofRandom(-10000,-800);
+            center_pos[index2].y = (j * space2) + center.y - (GRID_HEIGHT * space)*0.5;
+            //            center_pos[index2].z = ofRandom(-RANGE,RANGE);
+            center_pos[index2].z = 0;
             
-            int x	  = (i * space+((j%2)*0.5)*space) + center.x - (GRID_WIDTH * space);//
+            int x	  = center_pos[index2].x;
 			int y     = center_pos[index2].y;//(j * space2) + center.y - (GRID_HEIGHT * space2)*0.5;
 			int z     = center_pos[index2].z;
             
@@ -41,6 +44,7 @@ void testApp::setup(){
 			float hue = 1;
             //            float hue = ofRandom(1);
             center_pos[index2].set(x,y,z);
+            start[index2]= center_pos[index2];
             acc[index2].set(0,ofRandom(1,2),0);
             
 			for (int k=0; k<LENGTH; k++) {
@@ -68,12 +72,13 @@ void testApp::setup(){
     //	vbo.setTexCoordData(tex_coord, total, GL_DYNAMIC_DRAW);
     
     //	glEnable(GL_DEPTH_TEST);
-    ofSetupScreenOrtho();
-    count = 0;
-    startThread();
-    
-    light.setPosition(1000, 1000, 2000);
 
+    ofSetupScreenOrtho();
+    timeCount = count = 0;
+//    startThread();
+    
+    light.setPosition(ofGetWidth()*0.5, ofGetHeight()*0.5, 100);
+    
     
     // Setup post-processing chain
     post.init(ofGetWidth(), ofGetHeight());
@@ -90,58 +95,65 @@ void testApp::setup(){
 
 //--------------------------------------------------------------
 void testApp::update(){
-    timeCount+=ofGetLastFrameTime();
-    float t = (timeCount) * 0.8f;
-    float div = 250.0;
-    
-    for (int j=0; j<GRID_HEIGHT; j++) {
-        for (int i=0; i<GRID_WIDTH; i++) {
-            
-            int index = (j*GRID_WIDTH+i) * LENGTH;
-            int index2 = (j*GRID_WIDTH+i);
-            //                if(bStart[index2])
-            {
-                ofVec3f vec(ofSignedNoise(t, center_pos[index2].y/div, center_pos[index2].z/div),
-                            acc[index2].y,
-                            0);
-                center_pos[index2]+=vec;
-                float rdnSize = 1;
-                if(center_pos[index2].y>ofGetHeight()+100)
+//    count++;
+//    if(count>100)
+    {
+        timeCount+=ofGetLastFrameTime();
+        float t = (timeCount) * 0.8f;
+        float div = 250.0;
+        
+        for (int j=0; j<GRID_HEIGHT; j++) {
+            for (int i=0; i<GRID_WIDTH; i++) {
+                
+                int index = (j*GRID_WIDTH+i) * LENGTH;
+                int index2 = (j*GRID_WIDTH+i);
+                if(bStart[index2])
                 {
-                    center_pos[index2].y = ofRandom(-1000,-500);
-                    center_pos[index2].z = ofRandom(-RANGE,RANGE);
-                    int hex_index = 0;
-                    
-                    
-                    for (int k=0; k<LENGTH; k++) {
+                    ofVec3f vec(ofSignedNoise(t, center_pos[index2].y/div, center_pos[index2].z/div),
+                                acc[index2].y,
+                                0);
+                    center_pos[index2]+=vec;
+                    float rdnSize = 1;
+                    if(center_pos[index2].y>ofGetHeight()+100)
+                    {
+                        center_pos[index2].y = ofRandom(-1000,-500);
+                        center_pos[index2].z = ofRandom(-RANGE,RANGE);
                         
-                        loc[index +k].x = center_pos[index2].x+sin((hex_index/6.0f)*2*M_PI)*SIZE*rdnSize;
-                        loc[index +k].y = center_pos[index2].y+cos((hex_index/6.0f)*2*M_PI)*SIZE*rdnSize;
+                        int hex_index = 0;
+                        
+                        
+                        for (int k=0; k<LENGTH; k++) {
+                            
+                            loc[index +k].x = center_pos[index2].x+sin((hex_index/6.0f)*2*M_PI)*SIZE*rdnSize;
+                            loc[index +k].y = center_pos[index2].y+cos((hex_index/6.0f)*2*M_PI)*SIZE*rdnSize;
+                            loc[index +k].z = center_pos[index2].z;
+                            hex_index++;
+                        }
+                    }
+                    for (int k=0; k<LENGTH; k++) {
+                        loc[index +k].x = center_pos[index2].x+sin((k/6.0f)*2*M_PI)*SIZE*rdnSize;
+                        loc[index +k].y = center_pos[index2].y+cos((k/6.0f)*2*M_PI)*SIZE*rdnSize;
                         loc[index +k].z = center_pos[index2].z;
-                        hex_index++;
+                        //                pos[index+k] = loc[index+k];
+                        pos[index+k] = loc[index+k].getRotated(start[index2].y-center_pos[index2].y,center_pos[index2], ofVec3f(1,0,1));
+                        
+                        
                     }
                 }
-                for (int k=0; k<LENGTH; k++) {
-                    loc[index +k].x = center_pos[index2].x+sin((k/6.0f)*2*M_PI)*SIZE*rdnSize;
-                    loc[index +k].y = center_pos[index2].y+cos((k/6.0f)*2*M_PI)*SIZE*rdnSize;
-                    loc[index +k].z = center_pos[index2].z;
-                    //                pos[index+k] = loc[index+k];
-                    pos[index+k] = loc[index+k].getRotated(-vec.y-center_pos[index2].y,center_pos[index2], ofVec3f(1,0,1));
-                    
-                    
-                }
+                
             }
-            
         }
     }
-    
+    int index2 =ofRandom(0,GRID_HEIGHT*GRID_WIDTH);
+    bStart[index2] = true;
+
 }
-void testApp::threadedFunction(){
-    if(isThreadRunning())
-    {
-        //        ofSleepMillis(1000.0f/60.0f);
-    }
-}
+//void testApp::threadedFunction(){
+//    if(isThreadRunning())
+//    {
+//        //        ofSleepMillis(1000.0f/60.0f);
+//    }
+//}
 
 //--------------------------------------------------------------
 void testApp::draw(){
@@ -150,14 +162,14 @@ void testApp::draw(){
     
     // setup gl state
     glEnable(GL_DEPTH_TEST);
-//    glEnable(GL_CULL_FACE);
+    //    glEnable(GL_CULL_FACE);
     light.enable();
     
     // begin scene to post process
     post.begin(cam);
     
     ofPushMatrix();
-
+    
     ofScale(1, -1, 1);
 	ofEnableAlphaBlending();
     //	ofSetColor(255, 255, 255);
@@ -179,10 +191,10 @@ void testApp::draw(){
     // end scene and draw
     post.end();
     
-    // set gl state back to original
+    // set gl state back to  original
     glPopAttrib();
-//    image.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
-//    if(saver.isRecording()) saver.writeRGB(image.getPixels());
+    //    image.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
+    //    if(saver.isRecording()) saver.writeRGB(image.getPixels());
     server.publishScreen();
     if(ofGetLogLevel()==OF_LOG_VERBOSE)
     {
@@ -195,7 +207,7 @@ void testApp::draw(){
         }
         ofDrawBitmapString(ofToString(ofGetFrameRate()), 20,20);
     }
-
+    
     
 }
 
@@ -212,13 +224,13 @@ void testApp::keyPressed(int key){
     }
     unsigned idx = key - '0';
     if (idx < post.size()) post[idx]->setEnabled(!post[idx]->getEnabled());
-    //    for (int j=0; j<GRID_HEIGHT; j++) {
-    //        for (int i=0; i<GRID_WIDTH; i++) {
-    //
-    //            int index2 = (j*GRID_WIDTH+i);
-    //            bStart[index2] = !bStart[index2];
-    //        }
-    //    }
+//    for (int j=0; j<GRID_HEIGHT; j++) {
+//        for (int i=0; i<GRID_WIDTH; i++) {
+//
+//            int index2 =ofRandom(0,GRID_HEIGHT*GRID_WIDTH);
+//            bStart[index2] = true;
+//        }
+//    }
 }
 
 //--------------------------------------------------------------

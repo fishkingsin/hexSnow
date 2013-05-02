@@ -1,14 +1,14 @@
 #pragma once
 
 #include "ofMain.h"
-#define GRID_WIDTH  16
-#define GRID_HEIGHT 16
+#define GRID_WIDTH  32
+#define GRID_HEIGHT 32
 #define LENGTH		6
 #include "ofxPostProcessing.h"
 #define RANGE 300
 #include "ofxQTKitVideoSaver.h"
 #include "ofxSyphonServer.h"
-class testApp : public ofBaseApp , public ofThread{
+class testApp : public ofBaseApp {//, public ofThread{
 
 	public:
     void exit();
@@ -39,6 +39,7 @@ class testApp : public ofBaseApp , public ofThread{
     int SIZE;
     bool bStart[GRID_WIDTH*GRID_HEIGHT];
     ofVec3f center_pos[GRID_WIDTH*GRID_HEIGHT];
+    ofVec3f start[GRID_WIDTH*GRID_HEIGHT];
     ofVec3f acc[GRID_WIDTH*GRID_HEIGHT];
     int count;
     float timeCount;
